@@ -20,7 +20,7 @@ The OpenGL texture binding state (`GL_TEXTURE_BINDING_2D`) is modified during te
 
 ### Option 1: Google Colab (Recommended)
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/YOUR_USERNAME/fl-texture-repro/blob/main/repro.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/hummer98/fl-texture-repro/blob/main/repro.ipynb)
 
 ### Option 2: Local Build
 
