@@ -31,6 +31,7 @@ class TextureReproPage extends StatefulWidget {
 class _TextureReproPageState extends State<TextureReproPage> {
   int? _textureId;
   bool _isInitialized = false;
+  bool _cameraEnabled = true;
   int _buttonPressCount = 0;
 
   @override
@@ -51,6 +52,13 @@ class _TextureReproPageState extends State<TextureReproPage> {
     } catch (e) {
       debugPrint('Failed to initialize texture: $e');
     }
+  }
+
+  void _toggleCamera() {
+    // Just toggle visibility - don't restart pipeline to avoid crash
+    setState(() {
+      _cameraEnabled = !_cameraEnabled;
+    });
   }
 
   @override
@@ -85,83 +93,144 @@ class _TextureReproPageState extends State<TextureReproPage> {
 
             const SizedBox(height: 24),
 
-            // Texture display
-            Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              margin: const EdgeInsets.symmetric(horizontal: 16),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: SizedBox(
-                  width: 320,
-                  height: 240,
-                  child: _isInitialized && _textureId != null
-                      ? Texture(textureId: _textureId!)
-                      : const Center(
-                          child: CircularProgressIndicator(),
-                        ),
+            // Texture with various UI elements on all 4 sides
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Top: Text + Icon + Button
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.arrow_upward, color: Colors.red),
+                    const SizedBox(width: 8),
+                    const Text('TOP TEXT', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: () => setState(() => _buttonPressCount++),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: const Text('TOP'),
+                    ),
+                    const SizedBox(width: 8),
+                    const Chip(label: Text('Chip')),
+                  ],
                 ),
-              ),
+                const SizedBox(height: 4),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Left: Various elements stacked
+                    Column(
+                      children: [
+                        ElevatedButton(
+                          onPressed: () => setState(() => _buttonPressCount++),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            foregroundColor: Colors.white,
+                          ),
+                          child: const Text('LEFT'),
+                        ),
+                        const SizedBox(height: 4),
+                        const Icon(Icons.arrow_back, color: Colors.blue),
+                        const SizedBox(height: 4),
+                        const Text('L', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 4),
+                        Checkbox(value: true, onChanged: (_) {}),
+                      ],
+                    ),
+                    const SizedBox(width: 4),
+                    // Texture display
+                    Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey, width: 2),
+                      ),
+                      child: SizedBox(
+                        width: 320,
+                        height: 240,
+                        child: _cameraEnabled && _isInitialized && _textureId != null
+                            ? Texture(textureId: _textureId!)
+                            : Center(
+                                child: _cameraEnabled
+                                    ? const CircularProgressIndicator()
+                                    : const Text('Camera OFF', style: TextStyle(color: Colors.grey)),
+                              ),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    // Right: Various elements stacked
+                    Column(
+                      children: [
+                        ElevatedButton(
+                          onPressed: () => setState(() => _buttonPressCount++),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            foregroundColor: Colors.white,
+                          ),
+                          child: const Text('RIGHT'),
+                        ),
+                        const SizedBox(height: 4),
+                        const Icon(Icons.arrow_forward, color: Colors.green),
+                        const SizedBox(height: 4),
+                        const Text('R', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 4),
+                        Switch(value: true, onChanged: (_) {}),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                // Bottom: Text + Icon + Button
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.arrow_downward, color: Colors.orange),
+                    const SizedBox(width: 8),
+                    const Text('BOTTOM TEXT', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: () => setState(() => _buttonPressCount++),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: const Text('BOTTOM'),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.star, color: Colors.amber),
+                      onPressed: () {},
+                    ),
+                  ],
+                ),
+              ],
             ),
 
             const SizedBox(height: 16),
 
-            // Status text
-            Text(
-              _isInitialized
-                  ? 'Texture ID: $_textureId'
-                  : 'Initializing texture...',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-
-            const SizedBox(height: 24),
-
-            // Buttons near the texture - artifacts typically appear here
-            const Text(
-              '↓ Artifacts may appear on these buttons ↓',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.red,
-              ),
+            // Camera On/Off switch
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text('Camera: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                Switch(
+                  value: _cameraEnabled,
+                  onChanged: (_) => _toggleCamera(),
+                  activeColor: Colors.green,
+                ),
+                Text(_cameraEnabled ? 'ON' : 'OFF'),
+              ],
             ),
 
             const SizedBox(height: 8),
 
-            // Row of buttons
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              alignment: WrapAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() => _buttonPressCount++);
-                  },
-                  child: const Text('Button 1'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() => _buttonPressCount++);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    foregroundColor: Colors.white,
-                  ),
-                  child: const Text('Button 2'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() => _buttonPressCount++);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    foregroundColor: Colors.white,
-                  ),
-                  child: const Text('Button 3'),
-                ),
-              ],
+            // Status text
+            Text(
+              _isInitialized
+                  ? 'Texture ID: $_textureId | Clicks: $_buttonPressCount'
+                  : _cameraEnabled ? 'Initializing texture...' : 'Camera OFF',
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
 
             const SizedBox(height: 16),

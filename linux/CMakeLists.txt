@@ -43,8 +43,14 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE PkgConfig::GTK)
 
 # OpenGL dependencies for FlTextureGL
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(EPOXY REQUIRED IMPORTED_TARGET epoxy)
-target_link_libraries(${PLUGIN_NAME} PRIVATE PkgConfig::EPOXY)
+pkg_check_modules(EPOXY REQUIRED epoxy)
+target_include_directories(${PLUGIN_NAME} PRIVATE ${EPOXY_INCLUDE_DIRS})
+target_link_libraries(${PLUGIN_NAME} PRIVATE ${EPOXY_LIBRARIES})
+
+# GStreamer dependencies
+pkg_check_modules(GSTREAMER REQUIRED gstreamer-1.0 gstreamer-app-1.0 gstreamer-video-1.0)
+target_include_directories(${PLUGIN_NAME} PRIVATE ${GSTREAMER_INCLUDE_DIRS})
+target_link_libraries(${PLUGIN_NAME} PRIVATE ${GSTREAMER_LIBRARIES})
 
 # List of absolute paths to libraries that should be bundled with the plugin.
 # This list could contain prebuilt libraries, or libraries created by an
@@ -87,8 +93,10 @@ add_executable(${TEST_RUNNER}
 )
 apply_standard_settings(${TEST_RUNNER})
 target_include_directories(${TEST_RUNNER} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+target_include_directories(${TEST_RUNNER} PRIVATE ${EPOXY_INCLUDE_DIRS} ${GSTREAMER_INCLUDE_DIRS})
 target_link_libraries(${TEST_RUNNER} PRIVATE flutter)
 target_link_libraries(${TEST_RUNNER} PRIVATE PkgConfig::GTK)
+target_link_libraries(${TEST_RUNNER} PRIVATE ${EPOXY_LIBRARIES} ${GSTREAMER_LIBRARIES})
 target_link_libraries(${TEST_RUNNER} PRIVATE gtest_main gmock)
 
 # Enable automatic test discovery.
